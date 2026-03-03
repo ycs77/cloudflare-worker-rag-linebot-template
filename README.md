@@ -1,6 +1,6 @@
 # Cloudflare Worker RAG LINE Bot Template
 
-This is a template for building a Retrieval-Augmented Generation (RAG) LINE Bot using Cloudflare Workers. It provides a basic structure for integrating with the Line Messaging API and implementing RAG functionality.
+This is a template for building a Retrieval-Augmented Generation (RAG) LINE Bot using Cloudflare Workers. It provides a basic structure for integrating with the LINE Messaging API and implementing RAG functionality.
 
 ## Getting Started
 
@@ -20,25 +20,41 @@ Install dependencies via npm:
 npm install
 ```
 
-## Configuration
+## Prerequisites
 
-1. Update `wrangler.jsonc` with your Cloudflare account details (account_id, zone_id if needed).
-2. Add required bindings in `wrangler.jsonc`:
-  - LINE channel secret and access token (use wrangler secrets)
-  - Any AI, KV, R2, D1, Durable Object, or Vector bindings your bot requires
-3. Store secrets securely:
+- **Cloudflare R2**: Create a bucket to store the data files.
+- **Cloudflare AI Search**: Create an index for retrieval with the following settings:
+  - Embedding: `@cf/qwen/qwen3-embedding-0.6b` (Default)
+  - Query rewrite (true): `@cf/zai-org/glm-4.7-flash`
+  - Reranking (true): `@cf/baai/bge-reranker-base` (Default)
+  - Generation: `@cf/zai-org/glm-4.7-flash`
+- **Cloudflare Worker**: Create a Worker and link it to the current GitHub repository.
+- **LINE Official Account Manager**: Create an official account and enable the Messaging API channel.
+  - Obtain the Channel secret.
+  - Disable `Auto-reply messages`.
+- **LINE Developers**: Create a new Messaging API channel and obtain credentials.
+  - Generate a Channel access token.
+  - Webhook settings:
+    - Webhook URL (e.g., `https://your-worker.your-domain.workers.dev/webhook`)
+    - Enable **Use webhook**.
+- Once you have all credentials, configure the following Secrets in your Cloudflare Worker:
+  - `AI_SEARCH_AGENT_ID`: The index ID created in Cloudflare AI Search.
+  - `LINE_CHANNEL_ACCESS_TOKEN`: The Channel access token from LINE Developers.
+  - `LINE_CHANNEL_SECRET`: The Channel secret from LINE Developers.
 
-    ```bash
-    wrangler secret put LINE_CHANNEL_ACCESS_TOKEN
-    wrangler secret put LINE_CHANNEL_SECRET
-    wrangler secret put AI_API_KEY
-    ```
+## Data Preparation
 
-4. After changing wrangler bindings, run:
+Convert your data files into txt or Markdown format, place them in the `data` folder, and upload them to the R2 bucket you created.
 
-    ```bash
-    npm run cf-typegen
-    ```
+## Deploy
+
+Since the Worker is linked to your GitHub repository, every push to the main branch will automatically trigger a deployment via Cloudflare's CI/CD integration.
+
+To monitor live logs after deployment:
+
+```bash
+npm run tail
+```
 
 ## Local Development
 
@@ -48,20 +64,10 @@ Start the local dev server:
 npm run dev
 ```
 
-Configure a public tunnel (or use Cloudflare Workers preview) and set your LINE webhook URL to the tunnel endpoint.
+Set the environment variables in `.env`:
 
-## Deployment
-
-Build and publish:
-
-```bash
-npm run deploy
+```env
+AI_SEARCH_AGENT_ID=your Cloudflare AI Search index ID
+LINE_CHANNEL_ACCESS_TOKEN=your LINE Channel access token
+LINE_CHANNEL_SECRET=your LINE Channel secret
 ```
-
-Verify webhook and event delivery in the LINE Developers console.
-
-## Notes
-
-- Do not hardcode secrets in source files.
-- Refer to Cloudflare Workers docs for current API limits and platform guidance.
-- For bindings and platform limits, consult the AGENTS.md linked in this repo.
