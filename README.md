@@ -25,7 +25,7 @@ npm install
 - **Cloudflare R2**: Create a bucket to store the data files.
 - **Cloudflare AI Search**: Create an index for retrieval with the following settings:
   - Embedding: `@cf/qwen/qwen3-embedding-0.6b` (Default)
-  - Query rewrite (true): `@cf/zai-org/glm-4.7-flash`
+  - Query rewrite (true): `@cf/meta/llama-3.3-70b-instruct-fp8-fast` (Default)
   - Reranking (true): `@cf/baai/bge-reranker-base` (Default)
   - Generation: `@cf/zai-org/glm-4.7-flash`
 - **Cloudflare Worker**: Create a Worker and link it to the current GitHub repository.
